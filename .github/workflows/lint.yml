@@ -17,5 +17,8 @@ jobs:
           node-version: 20
           cache: 'npm'
 
+      - name: Install
+        run: npm i
+
       - name: Lint Check
         run: npm run lint
