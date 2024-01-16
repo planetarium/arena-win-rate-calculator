@@ -5,22 +5,24 @@ import {
 } from "react-router-dom";
 
 import Root from "./App";
-import MainPage from "./pages/MainPage";
-import Main2Page from "./pages/Main2Page";
+import AvatarInputPage from "./pages/AvatarInputPage";
+import AgentInputPage from "./pages/AgentInputPage";
+import ArenaPage from "./pages/ArenaPage";
 import ErrorPage from "./pages/ErrorPage";
 import { Routes } from "./constants";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route
-      path={`/${Routes.MAIN}`}
+      path={`/${Routes.ROOT}`}
       element={<Root />}
       errorElement={<ErrorPage />}
     >
       <Route errorElement={<ErrorPage />}>
-        <Route index element={<MainPage />} />
+        <Route index element={<AgentInputPage />} />
 
-        <Route path={Routes.MAIN2} element={<Main2Page />} />
+        <Route path={Routes.AVATAR} element={<AvatarInputPage />} />
+        <Route path={Routes.ARENA} element={<ArenaPage />} />
       </Route>
     </Route>
   )
