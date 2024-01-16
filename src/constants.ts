@@ -1,6 +1,6 @@
 export const BASE_URL = "https://test.com/";
 
 export enum Routes {
-  MAIN = "",
+  ROOT = "",
   MAIN2 = "main2",
 }

@@ -13,7 +13,7 @@ import { Routes } from "./constants";
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route
-      path={`/${Routes.MAIN}`}
+      path={`/${Routes.ROOT}`}
       element={<Root />}
       errorElement={<ErrorPage />}
     >
