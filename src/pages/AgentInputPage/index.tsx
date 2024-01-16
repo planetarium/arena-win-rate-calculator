@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
+import { Routes } from "~/constants";
 
-const MainPage = () => {
+const AgentInputPage = () => {
   return (
     <div className="flex-1 flex items-center">
       <div className="card w-full bg-neutral shadow-xl">
@@ -15,7 +16,7 @@ const MainPage = () => {
                 placeholder="0x..."
                 className="input input-bordered w-full max-w-xs"
               />
-              <Link to="main2" className="btn btn-primary ml-2">Enter</Link>
+              <Link to={`/${Routes.AVATAR}`} className="btn btn-primary ml-2">Enter</Link>
             </div>
           </label>
         </div>
@@ -24,4 +25,4 @@ const MainPage = () => {
   );
 };
 
-export default MainPage;
+export default AgentInputPage;
