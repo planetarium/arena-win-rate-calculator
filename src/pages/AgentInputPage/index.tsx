@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Routes } from "~/constants";
+import { Routes } from "../../constants";
 
 const AgentInputPage = () => {
   return (
