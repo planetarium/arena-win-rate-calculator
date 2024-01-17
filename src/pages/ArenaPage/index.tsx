@@ -1,6 +1,6 @@
 const ArenaPage = () => {
   return (
-    <div className="px-4 flex flex-col flex-1">
+    <div className="px-4 flex flex-col flex-1 bg-neutral card shadow-xl">
       <div className="join w-full mt-4">
         <div className="w-full">
           <div>
