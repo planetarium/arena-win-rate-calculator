@@ -1,11 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Routes } from "../../constants";
-
-interface Avatar {
-  name: string;
-  code: string;
-}
+import { Avatar } from "../../types";
 
 const AvatarInputPage = () => {
   const navigate = useNavigate();
