@@ -25,15 +25,15 @@ jobs:
           role-session-name: GitHubActions-${{ github.run_id }}
           role-duration-seconds: 3000
           aws-region: ap-northeast-2
-    
+
       - uses: actions/setup-node@v4
         with:
-        node-version: 20
-        cache: 'npm'
+          node-version: 20
+          cache: "npm"
 
       - name: Install
         run: npm i
-  
+
       - name: Lint Check
         run: npm run lint
 
