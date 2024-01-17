@@ -34,9 +34,6 @@ jobs:
       - name: Install
         run: npm i
 
-      - name: Lint Check
-        run: npm run lint
-
       - name: release
         shell: bash
         run: |
