@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  push:
+    tags: ["*"]
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3.6.0
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-session-name: GitHubActions-${{ github.run_id }}
+          role-duration-seconds: 3000
+          aws-region: ap-northeast-2
+    
+      - uses: actions/setup-node@v4
+        with:
+        node-version: 20
+        cache: 'npm'
+
+      - name: Install
+        run: npm i
+  
+      - name: Lint Check
+        run: npm run lint
+
+      - name: release
+        shell: bash
+        run: |
+          sh scripts/deploy.sh
+
+      - uses: actions/upload-artifact@v3.1.2
+        with:
+          path: dist
+          name: Dist
+          retention-days: 3
+          if-no-files-found: error
