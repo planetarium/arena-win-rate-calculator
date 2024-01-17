@@ -1,18 +1,78 @@
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Avatar } from "../../types";
+
+interface ArenaInfo {
+  rank: number;
+  avatar: Avatar;
+  score: number;
+  winRate: number | null | undefined;
+}
+
 const ArenaPage = () => {
+  const [searchParams] = useSearchParams();
+  const avatarAddress = searchParams.get("avatarAddress");
+  const [searchAddress, setSearchAddress] = useState<string>("");
+  const [arenaInfos, setArenaInfos] = useState<Array<ArenaInfo>>([]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchAddress(e.target.value);
+  };
+
+  useEffect(() => {
+    console.log(avatarAddress);
+    setArenaInfos([
+      {
+        rank: 1,
+        avatar: {
+          name: "temp1",
+          code: "0x1e1b572db70ab80bb02783a0d2c594a0ede6db28",
+        },
+        score: 3062,
+        winRate: null,
+      },
+      {
+        rank: 2,
+        avatar: {
+          name: "temp2",
+          code: "0x1e1b572db70ab80bb02783a0d2c594a0ede6db28",
+        },
+        score: 3062,
+        winRate: undefined,
+      },
+      {
+        rank: 3,
+
+        avatar: {
+          name: "temp3",
+          code: "0x1e1b572db70ab80bb02783a0d2c594a0ede6db28",
+        },
+        score: 3061,
+        winRate: 20,
+      },
+      {
+        rank: 4,
+
+        avatar: {
+          name: "temp4",
+          code: "0x1e1b572db70ab80bb02783a0d2c594a0ede6db28",
+        },
+        score: 3061,
+        winRate: 70,
+      },
+    ]);
+  }, []);
+
   return (
-    <div className="px-4 flex flex-col flex-1">
+    <div className="px-4 flex flex-col flex-1 bg-neutral card shadow-xl">
       <div className="join w-full mt-4">
-        <div className="w-full">
-          <div>
-            <input
-              className="input input-bordered join-item w-full"
-              placeholder="0x..."
-            />
-          </div>
-        </div>
-        <div className="indicator">
-          <button className="btn join-item">Search</button>
-        </div>
+        <input
+          className="input join-item w-full"
+          placeholder="0x..."
+          value={searchAddress}
+          onChange={handleInputChange}
+        />
+        <button className="btn join-item">Search</button>
       </div>
 
       <div className="mt-2 overflow-auto min-h-0 flex-grow flex-shrink basis-0">
@@ -22,55 +82,45 @@ const ArenaPage = () => {
               <th></th>
               <th>Info</th>
               <th>Score</th>
-              <th>Win Rate</th>
+              <th className="text-center">Win Rate</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>1</td>
-              <td>
-                <div className="flex items-center gap-3">
-                  <div>
-                    <div className="font-bold">zumic</div>
-                    <div className="text-sm opacity-50">#c106</div>
+            {arenaInfos.map((d) => (
+              <tr>
+                <td>{d.rank}</td>
+                <td>
+                  <div className="flex items-center gap-3">
+                    <div>
+                      <div className="font-bold">{d.avatar.name}</div>
+                      <div className="text-sm opacity-50">
+                        #{d.avatar.code.slice(0, 4)}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </td>
-              <td>3062</td>
-              <td className="text-center">
-                <div className="badge badge-primary">70%</div>
-              </td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>
-                <div className="flex items-center gap-3">
-                  <div>
-                    <div className="font-bold">BH</div>
-                    <div className="text-sm opacity-50">#c106</div>
-                  </div>
-                </div>
-              </td>
-              <td>3062</td>
-              <td className="text-center">
-                <span className="loading loading-spinner loading-sm"></span>
-              </td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>
-                <div className="flex items-center gap-3">
-                  <div>
-                    <div className="font-bold">KING</div>
-                    <div className="text-sm opacity-50">#c106</div>
-                  </div>
-                </div>
-              </td>
-              <td>3062</td>
-              <td className="text-center">
-                <div className="badge badge-secondary">5%</div>
-              </td>
-            </tr>
+                </td>
+                <td>{d.score}</td>
+                <td className="text-center">
+                  {!d.winRate ? (
+                    <button className="btn btn-xs">
+                      {d.winRate === undefined ? (
+                        "?"
+                      ) : (
+                        <span className="loading loading-xs loading-spinner"></span>
+                      )}
+                    </button>
+                  ) : (
+                    <div
+                      className={`badge ${
+                        d.winRate < 30 ? "badge-primary" : "badge-secondary"
+                      }`}
+                    >
+                      {d.winRate}%
+                    </div>
+                  )}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
