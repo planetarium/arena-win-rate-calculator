@@ -42,7 +42,6 @@ const ArenaPage = () => {
       },
       {
         rank: 3,
-
         avatar: {
           name: "temp3",
           code: "0x1e1b572db70ab80bb02783a0d2c594a0ede6db28",
@@ -52,7 +51,6 @@ const ArenaPage = () => {
       },
       {
         rank: 4,
-
         avatar: {
           name: "temp4",
           code: "0x1e1b572db70ab80bb02783a0d2c594a0ede6db28",

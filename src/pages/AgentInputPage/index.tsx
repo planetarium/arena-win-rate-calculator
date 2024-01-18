@@ -12,7 +12,9 @@ const AgentInputPage = () => {
 
   const handleSubmit = () => {
     if (agentAddress.length < 42 || !agentAddress.startsWith("0x")) {
-      alert("Please enter a valid agent address. It should start with '0x' and be at least 42 characters long.");
+      alert(
+        "Please enter a valid agent address. It should start with '0x' and be at least 42 characters long."
+      );
       return;
     }
 
@@ -24,10 +26,17 @@ const AgentInputPage = () => {
       <div className="card w-full bg-neutral shadow-xl">
         <div className="card-body items-center">
           <label className="form-control w-full max-w-xs">
-            <div className="label">
-              <span className="label-text text-lg">
-                Type your agent address
-              </span>
+            <div className="flex justify-between items-center">
+              <div className="label">
+                <span className="label-text text-lg">
+                  Type your agent address
+                </span>
+              </div>
+
+              <select className="select select-ghost select-xs max-w-xs">
+                <option selected>Odin</option>
+                <option>Heimdall</option>
+              </select>
             </div>
             <div className="flex">
               <input
