@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Avatar } from "../../types";
+import { getArenaIndex } from "../../apiClient";
 
 interface ArenaInfo {
   rank: number;
@@ -14,52 +15,39 @@ const ArenaPage = () => {
   const avatarAddress = searchParams.get("avatarAddress");
   const [searchAddress, setSearchAddress] = useState<string>("");
   const [arenaInfos, setArenaInfos] = useState<Array<ArenaInfo>>([]);
+  const [currentPage, setCurrentPage] = useState<number>(1); // 현재 페이지 상태
+  const [totalPages, setTotalPages] = useState<number>(5); // 전체 페이지 수, 실제 API로부터 받아와야 할 수도 있음
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchAddress(e.target.value);
   };
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page); // 페이지 번호 변경
+  };
+
+  const fetchArenaInfos = (page: number) => {
+    const limit = 10;
+    const offset = (page - 1) * limit;
+    getArenaIndex(limit, offset).then((r) => {
+      setArenaInfos(
+        r.data.battleArenaRanking.map((d: any) => ({
+          rank: d.ranking,
+          avatar: {
+            name: d.name,
+            code: d.avatarAddress,
+          },
+          score: d.score,
+          winRate: undefined, // 추후 구현할 수 있음
+        }))
+      );
+      // setTotalPages(...) // 전체 페이지 수를 설정하는 로직 (API로부터 받아올 수 있음)
+    });
+  };
+
   useEffect(() => {
-    console.log(avatarAddress);
-    setArenaInfos([
-      {
-        rank: 1,
-        avatar: {
-          name: "temp1",
-          code: "0x1e1b572db70ab80bb02783a0d2c594a0ede6db28",
-        },
-        score: 3062,
-        winRate: null,
-      },
-      {
-        rank: 2,
-        avatar: {
-          name: "temp2",
-          code: "0x1e1b572db70ab80bb02783a0d2c594a0ede6db28",
-        },
-        score: 3062,
-        winRate: undefined,
-      },
-      {
-        rank: 3,
-        avatar: {
-          name: "temp3",
-          code: "0x1e1b572db70ab80bb02783a0d2c594a0ede6db28",
-        },
-        score: 3061,
-        winRate: 20,
-      },
-      {
-        rank: 4,
-        avatar: {
-          name: "temp4",
-          code: "0x1e1b572db70ab80bb02783a0d2c594a0ede6db28",
-        },
-        score: 3061,
-        winRate: 70,
-      },
-    ]);
-  }, []);
+    fetchArenaInfos(currentPage);
+  }, [currentPage]); // currentPage가 변경될 때마다 데이터를 불러옴
 
   return (
     <div className="px-4 flex flex-col flex-1 bg-neutral card shadow-xl">
@@ -85,7 +73,7 @@ const ArenaPage = () => {
           </thead>
           <tbody>
             {arenaInfos.map((d) => (
-              <tr>
+              <tr key={d.avatar.code}>
                 <td>{d.rank}</td>
                 <td>
                   <div className="flex items-center gap-3">
@@ -124,14 +112,27 @@ const ArenaPage = () => {
       </div>
 
       <div className="join w-full flex justify-center mt-4 mb-2">
-        <button className="join-item btn btn-xs">«</button>
-        <button className="join-item btn btn-xs">1</button>
-        <button className="join-item btn btn-xs">2</button>
-        <button className="join-item btn btn-xs btn-disabled">...</button>
-        <button className="join-item btn btn-xs btn-active">23</button>
-        <button className="join-item btn btn-xs">24</button>
-        <button className="join-item btn btn-xs">25</button>
-        <button className="join-item btn btn-xs">»</button>
+        <button
+          className={`join-item btn btn-xs ${currentPage === 1 ? "btn-disabled" : ""}`}
+          onClick={() => handlePageChange(currentPage - 1)}
+        >
+          «
+        </button>
+        {[...Array(totalPages)].map((_, idx) => (
+          <button
+            key={idx}
+            className={`join-item btn btn-xs ${currentPage === idx + 1 ? "btn-active" : ""}`}
+            onClick={() => handlePageChange(idx + 1)}
+          >
+            {idx + 1}
+          </button>
+        ))}
+        <button
+          className={`join-item btn btn-xs ${currentPage === totalPages ? "btn-disabled" : ""}`}
+          onClick={() => handlePageChange(currentPage + 1)}
+        >
+          »
+        </button>
       </div>
     </div>
   );

@@ -54,3 +54,35 @@ export async function getWinRate(
     `arena/calc-win-rate?${queryParams.toString()}`
   );
 }
+
+export async function getArenaIndex(
+  limit: number,
+  offset: number
+): Promise<any> {
+  const graphqlQuery = {
+    query: `{
+      battleArenaRanking(
+        championshipId: 0
+        round: 8
+        offset: ${offset}
+        limit: ${limit}
+      ) {
+        blockIndex
+        agentAddress
+        avatarAddress
+        name
+        cp
+        round
+        score
+        ticket
+        ranking
+        timeStamp
+      }
+    }`,
+  };
+
+  return fetchAPI<any>("query", {
+    method: "POST",
+    body: graphqlQuery,
+  });
+}
