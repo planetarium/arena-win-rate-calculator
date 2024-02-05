@@ -57,32 +57,42 @@ export async function getWinRate(
 
 export async function getArenaIndex(
   limit: number,
-  offset: number
+  offset: number,
+  avatarAddress: string | undefined = undefined
 ): Promise<any> {
   const graphqlQuery = {
-    query: `{
-      battleArenaRanking(
-        championshipId: 0
-        round: 8
-        offset: ${offset}
-        limit: ${limit}
-      ) {
-        blockIndex
-        agentAddress
-        avatarAddress
-        name
-        cp
-        round
-        score
-        ticket
-        ranking
-        timeStamp
-      }
-    }`,
+    operationName: "GetArenaRanking",
+    query: `query GetArenaRanking($offset: Int! $limit: Int!, $avatarAddress: String) {
+        battleArenaRanking(
+          championshipId: 0
+          round: 8
+          offset: $offset
+          limit: $limit
+          avatarAddress: $avatarAddress
+        ) {
+          blockIndex
+          agentAddress
+          avatarAddress
+          name
+          cp
+          round
+          score
+          ticket
+          ranking
+          timeStamp
+        }
+      }`,
+    variables: {
+      offset,
+      limit,
+      avatarAddress,
+    },
   };
 
-  return fetchAPI<any>("query", {
+  return fetchAPI<any>("dp", {
     method: "POST",
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     body: graphqlQuery,
   });
 }
