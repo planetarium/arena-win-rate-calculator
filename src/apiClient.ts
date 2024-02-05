@@ -65,7 +65,7 @@ export async function getArenaIndex(
     query: `query GetArenaRanking($offset: Int! $limit: Int!, $avatarAddress: String) {
         battleArenaRanking(
           championshipId: 0
-          round: 8
+          round: 9
           offset: $offset
           limit: $limit
           avatarAddress: $avatarAddress
