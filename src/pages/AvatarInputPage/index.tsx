@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Routes } from "../../constants";
 import { Avatar } from "../../types";
+import { getAvatars } from "../../apiClient";
 
 const AvatarInputPage = () => {
   const navigate = useNavigate();
@@ -12,12 +13,16 @@ const AvatarInputPage = () => {
   const agentAddress = searchParams.get("agentAddress");
 
   useEffect(() => {
-    console.log(agentAddress);
-    setAvatars([
-      { name: "temp1", code: "0x1e1b572db70ab80bb02783a0d2c594a0ede6db28" },
-      { name: "temp2", code: "0x2e1b572db70ab80bb02783a0d2c594a0ede6db28" },
-      { name: "temp3", code: "0x3e1b572db70ab80bb02783a0d2c594a0ede6db28" },
-    ]);
+    if (agentAddress) {
+      getAvatars(agentAddress).then((r) => {
+        setAvatars(
+          r.avatars.map((d: any) => ({
+            name: d.avatarName,
+            code: d.avatarAddress,
+          }))
+        );
+      });
+    }
   }, []);
 
   const handleSubmit = () => {

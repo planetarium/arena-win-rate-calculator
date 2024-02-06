@@ -38,21 +38,24 @@ async function fetchAPI<TResponse, TBody = undefined>(
   }
 }
 
-interface WinRateResponse {
-  winRate: number;
+export async function getWinRate(
+  myAvatarAddress: string,
+  enemyAvatarAddress: string
+): Promise<any> {
+  const body = {
+    myAvatarAddress,
+    enemyAvatarAddress,
+  };
+  return fetchAPI<any>(`arena/simulate`, {
+    method: "POST",
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    body,
+  });
 }
 
-export async function getWinRate(
-  address: string,
-  targetAddress: string
-): Promise<WinRateResponse> {
-  const queryParams = new URLSearchParams({
-    address,
-    target_address: targetAddress,
-  });
-  return fetchAPI<WinRateResponse>(
-    `arena/calc-win-rate?${queryParams.toString()}`
-  );
+export async function getAvatars(agentAddress: string): Promise<any> {
+  return fetchAPI<any>(`agent/${agentAddress}/avatars`);
 }
 
 export async function getArenaIndex(

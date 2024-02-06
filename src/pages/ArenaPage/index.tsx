@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Avatar } from "../../types";
-import { getArenaIndex } from "../../apiClient";
+import { getArenaIndex, getWinRate } from "../../apiClient";
 
 interface ArenaInfo {
   rank: number;
@@ -12,7 +12,7 @@ interface ArenaInfo {
 
 const ArenaPage = () => {
   const [searchParams] = useSearchParams();
-  let myAvatarAddress = searchParams.get("avatarAddress");
+  const myAvatarAddress = searchParams.get("avatarAddress");
 
   const [searchAddress, setSearchAddress] = useState<string>("");
   const [avatarAddress, setAvatarAddress] = useState<string>("");
@@ -42,6 +42,36 @@ const ArenaPage = () => {
   const handlePageChange = (page: number) => {
     if (page >= 1 && (hasMoreData || page < currentPage)) {
       setCurrentPage(page);
+    }
+  };
+
+  const handleWinRateClick = (index: number) => {
+    setArenaInfos((prevAreaInfos) =>
+      prevAreaInfos.map((v, i) => {
+        if (i === index) {
+          return {
+            ...v,
+            winRate: null,
+          };
+        }
+        return v;
+      })
+    );
+
+    if (myAvatarAddress) {
+      getWinRate(myAvatarAddress, arenaInfos[index].avatar.code).then((r) => {
+        setArenaInfos((prevAreaInfos) =>
+          prevAreaInfos.map((v, i) => {
+            if (i === index) {
+              return {
+                ...v,
+                winRate: Number(r.winRate * 100),
+              };
+            }
+            return v;
+          })
+        );
+      });
     }
   };
 
@@ -89,29 +119,56 @@ const ArenaPage = () => {
   const findPageWithAvatar = async (targetAvatarAddress: string) => {
     setIsLoading(true);
 
+    const maxAttempts = 10;
     let pageFound = false;
-    let maxAttempts = 5;
-    let tryCount = 1;
+    let attempts = 0;
 
-    const specificAvatarData = await getArenaIndex(1, 1, targetAvatarAddress);
-    let page = Number(
-      Math.floor(specificAvatarData.data.battleArenaRanking[0].ranking / limit)
-    );
+    const initialData = await getArenaIndex(1, 0, targetAvatarAddress);
+    if (initialData.data.battleArenaRanking.length === 0) {
+      setIsLoading(false);
+      setCurrentPage(1);
+      return;
+    }
 
-    while (!pageFound && tryCount <= maxAttempts) {
-      const offset = page * limit;
-      const data = await getArenaIndex(limit, Math.floor(offset / 10) * 10);
+    const initialRanking = initialData.data.battleArenaRanking[0].ranking;
+    let page = Math.ceil(initialRanking / limit);
 
-      pageFound = data.data.battleArenaRanking.some(
+    while (!pageFound && attempts < maxAttempts) {
+      const offset = (page - 1) * limit;
+      const data = await getArenaIndex(limit, offset);
+
+      const avatarEntry = data.data.battleArenaRanking.find(
         (d: any) => d.avatarAddress === targetAvatarAddress
       );
-      if (!pageFound) {
-        tryCount += 1;
-        page -= 1;
+
+      if (avatarEntry) {
+        pageFound = true;
+        setCurrentPage(page);
+      } else {
+        const minRankingInResponse = Math.min(
+          ...data.data.battleArenaRanking.map((d: any) => d.ranking)
+        );
+        const maxRankingInResponse = Math.max(
+          ...data.data.battleArenaRanking.map((d: any) => d.ranking)
+        );
+
+        if (minRankingInResponse == maxRankingInResponse) {
+          page += 1;
+        } else if (initialRanking <= minRankingInResponse) {
+          page -= 1;
+        } else if (initialRanking >= maxRankingInResponse) {
+          page += 1;
+        }
+
+        attempts += 1;
       }
     }
 
-    setCurrentPage(page + 1);
+    if (!pageFound) {
+      setCurrentPage(page);
+    }
+
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -158,7 +215,7 @@ const ArenaPage = () => {
               </tr>
             </thead>
             <tbody>
-              {arenaInfos.map((d) => (
+              {arenaInfos.map((d, i) => (
                 <tr
                   key={d.avatar.code}
                   className={`${
@@ -178,8 +235,11 @@ const ArenaPage = () => {
                   </td>
                   <td>{d.score}</td>
                   <td className="text-center">
-                    {!d.winRate ? (
-                      <button className="btn btn-xs">
+                    {d.winRate === undefined || d.winRate === null ? (
+                      <button
+                        className="btn btn-xs"
+                        onClick={() => handleWinRateClick(i)}
+                      >
                         {d.winRate === undefined ? (
                           "?"
                         ) : (
