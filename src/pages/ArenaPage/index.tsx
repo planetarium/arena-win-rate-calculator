@@ -65,7 +65,7 @@ const ArenaPage = () => {
             if (i === index) {
               return {
                 ...v,
-                winRate: Number(r.winRate * 100),
+                winRate: Math.round(r.winRate * 100),
               };
             }
             return v;
