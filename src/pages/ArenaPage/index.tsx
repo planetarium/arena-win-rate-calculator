@@ -7,6 +7,7 @@ interface ArenaInfo {
   rank: number;
   avatar: Avatar;
   score: number;
+  cp: number;
   winRate: number | null | undefined;
 }
 
@@ -22,7 +23,7 @@ const ArenaPage = () => {
   const [arenaInfos, setArenaInfos] = useState<Array<ArenaInfo>>([]);
   const [currentPage, setCurrentPage] = useState<number>(-1);
   const [hasMoreData, setHasMoreData] = useState<boolean>(true);
-  const limit = 10;
+  const limit = 15;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchAddress(e.target.value);
@@ -108,6 +109,7 @@ const ArenaPage = () => {
             code: d.avatarAddress,
           },
           score: d.score,
+          cp: d.cp,
           winRate: undefined,
         }))
       );
@@ -205,10 +207,10 @@ const ArenaPage = () => {
             <span className="loading loading-dots loading-lg"></span>{" "}
           </div>
         ) : (
-          <table className="table">
+          <table className="table table-sm">
             <thead>
               <tr>
-                <th></th>
+                <th>Rank</th>
                 <th>Info</th>
                 <th>Score</th>
                 <th className="text-center">Win Rate</th>
@@ -222,18 +224,27 @@ const ArenaPage = () => {
                     d.avatar.code === avatarAddress ? "bg-base-100" : ""
                   }`}
                 >
-                  <td>{d.rank}</td>
+                  <td className="text-xs text-center">{d.rank}</td>
                   <td>
-                    <div className="flex items-center gap-3">
-                      <div>
-                        <div className="font-bold">{d.avatar.name}</div>
-                        <div className="text-sm opacity-50">
+                    <div className="flex flex-col gap-1">
+                      <div className="flex gap-1">
+                        <div className="text-xs font-bold">{d.avatar.name}</div>
+                        <div
+                          className="text-xs opacity-30 hover:bg-base-200 hover:cursor-pointer"
+                          onClick={() => {
+                            navigator.clipboard.writeText(
+                              d.avatar.code
+                            );
+                            alert(`Copy ${d.avatar.code}`);
+                          }}
+                        >
                           #{d.avatar.code.slice(0, 4)}
                         </div>
                       </div>
+                      <div className="text-xs">CP {d.cp}</div>
                     </div>
                   </td>
-                  <td>{d.score}</td>
+                  <td className="text-xs">{d.score}</td>
                   <td className="text-center">
                     {d.winRate === undefined || d.winRate === null ? (
                       <button
