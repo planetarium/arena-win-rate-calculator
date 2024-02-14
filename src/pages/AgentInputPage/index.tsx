@@ -33,10 +33,10 @@ const AgentInputPage = () => {
                 </span>
               </div>
 
-              <select className="select select-ghost select-xs max-w-xs">
+              {/* <select className="select select-ghost select-xs max-w-xs">
                 <option selected>Odin</option>
                 <option>Heimdall</option>
-              </select>
+              </select> */}
             </div>
             <div className="flex">
               <input
