@@ -58,44 +58,15 @@ export async function getAvatars(agentAddress: string): Promise<any> {
   return fetchAPI<any>(`agent/${agentAddress}/avatars`);
 }
 
-export async function getArenaIndex(
+export async function getArenaRanking(
   limit: number,
   offset: number,
-  avatarAddress: string | undefined = undefined
 ): Promise<any> {
-  const graphqlQuery = {
-    operationName: "GetArenaRanking",
-    query: `query GetArenaRanking($offset: Int! $limit: Int!, $avatarAddress: String) {
-        battleArenaRanking(
-          championshipId: 0
-          round: 9
-          offset: $offset
-          limit: $limit
-          avatarAddress: $avatarAddress
-        ) {
-          blockIndex
-          agentAddress
-          avatarAddress
-          name
-          cp
-          round
-          score
-          ticket
-          ranking
-          timeStamp
-        }
-      }`,
-    variables: {
-      offset,
-      limit,
-      avatarAddress,
-    },
-  };
+  return fetchAPI<any>(`arena/ranking?limit=${limit}&offset=${offset}`);
+}
 
-  return fetchAPI<any>("dp", {
-    method: "POST",
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    body: graphqlQuery,
-  });
+export async function getArenaIndex(
+  avatarAddress: string,
+): Promise<any> {
+  return fetchAPI<number>(`arena/ranking/${avatarAddress}/rank`);
 }

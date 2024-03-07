@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Avatar } from "../../types";
-import { getArenaIndex, getWinRate } from "../../apiClient";
+import { getArenaIndex, getArenaRanking, getWinRate } from "../../apiClient";
 
 interface ArenaInfo {
   rank: number;
@@ -100,20 +100,21 @@ const ArenaPage = () => {
     setIsLoading(true);
 
     const offset = (page - 1) * limit;
-    getArenaIndex(limit, offset).then((r) => {
+    getArenaRanking(limit, offset).then((r) => {
+      console.log(r);
       setArenaInfos(
-        r.data.battleArenaRanking.map((d: any) => ({
-          rank: d.ranking,
+        r.map((d: any) => ({
+          rank: d.rank,
           avatar: {
-            name: d.name,
-            code: d.avatarAddress,
+            name: d.avatar.avatarName,
+            code: d.avatar.avatarAddress,
           },
           score: d.score,
           cp: d.cp,
           winRate: undefined,
         }))
       );
-      setHasMoreData(r.data.battleArenaRanking.length === limit);
+      setHasMoreData(r.length === limit);
       setIsLoading(false);
     });
   };
@@ -125,21 +126,21 @@ const ArenaPage = () => {
     let pageFound = false;
     let attempts = 0;
 
-    const initialData = await getArenaIndex(1, 0, targetAvatarAddress);
-    if (initialData.data.battleArenaRanking.length === 0) {
+    const targetAvatarIndex = await getArenaIndex(targetAvatarAddress);
+    if (!targetAvatarIndex) {
       setIsLoading(false);
       setCurrentPage(1);
       return;
     }
 
-    const initialRanking = initialData.data.battleArenaRanking[0].ranking;
-    let page = Math.ceil(initialRanking / limit);
+    let page = Math.ceil(targetAvatarIndex / limit);
 
     while (!pageFound && attempts < maxAttempts) {
       const offset = (page - 1) * limit;
-      const data = await getArenaIndex(limit, offset);
+      const data = await getArenaRanking(limit, offset);
+      console.log(data);
 
-      const avatarEntry = data.data.battleArenaRanking.find(
+      const avatarEntry = data.find(
         (d: any) => d.avatarAddress === targetAvatarAddress
       );
 
@@ -147,18 +148,14 @@ const ArenaPage = () => {
         pageFound = true;
         setCurrentPage(page);
       } else {
-        const minRankingInResponse = Math.min(
-          ...data.data.battleArenaRanking.map((d: any) => d.ranking)
-        );
-        const maxRankingInResponse = Math.max(
-          ...data.data.battleArenaRanking.map((d: any) => d.ranking)
-        );
+        const minRankingInResponse = Math.min(...data.map((d: any) => d.rank));
+        const maxRankingInResponse = Math.max(...data.map((d: any) => d.rank));
 
         if (minRankingInResponse == maxRankingInResponse) {
           page += 1;
-        } else if (initialRanking <= minRankingInResponse) {
+        } else if (targetAvatarIndex <= minRankingInResponse) {
           page -= 1;
-        } else if (initialRanking >= maxRankingInResponse) {
+        } else if (targetAvatarIndex >= maxRankingInResponse) {
           page += 1;
         }
 
@@ -232,9 +229,7 @@ const ArenaPage = () => {
                         <div
                           className="text-xs opacity-30 hover:bg-base-200 hover:cursor-pointer"
                           onClick={() => {
-                            navigator.clipboard.writeText(
-                              d.avatar.code
-                            );
+                            navigator.clipboard.writeText(d.avatar.code);
                             alert(`Copy ${d.avatar.code}`);
                           }}
                         >
