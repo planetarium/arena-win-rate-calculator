@@ -218,7 +218,7 @@ const ArenaPage = () => {
             value={searchAddress}
             onChange={handleInputChange}
           />
-          <button className="px-2">
+          <button className="px-2" onClick={handleInputSubmit}>
             <FiSearch size={20} />
           </button>
         </div>
@@ -344,123 +344,6 @@ const ArenaPage = () => {
       <Controller />
     </div>
   );
-
-  // return (
-  //   <div className="px-4 flex flex-col flex-1 bg-neutral card shadow-xl">
-  //     <div className="join w-full mt-4">
-  //       <input
-  //         className="input join-item w-full"
-  //         placeholder="0x..."
-  //         value={searchAddress}
-  //         onChange={handleInputChange}
-  //       />
-  //       <button className="btn join-item" onClick={handleInputSubmit}>
-  //         Search
-  //       </button>
-  //     </div>
-
-  //     <div className="mt-2 overflow-auto min-h-0 flex-grow flex-shrink basis-0">
-  //       {isLoading ? (
-  //         <div className="flex justify-center items-center">
-  //           <span className="loading loading-dots loading-lg"></span>{" "}
-  //         </div>
-  //       ) : (
-  //         <table className="table table-sm">
-  //           <thead>
-  //             <tr>
-  //               <th>Rank</th>
-  //               <th>Info</th>
-  //               <th>Score</th>
-  //               <th className="text-center">Win Rate</th>
-  //             </tr>
-  //           </thead>
-  //           <tbody>
-  //             {arenaInfos.map((d, i) => (
-  //               <tr
-  //                 key={d.avatar.code}
-  //                 className={`${
-  //                   d.avatar.code === avatarAddress ? "bg-base-100" : ""
-  //                 }`}
-  //               >
-  //                 <td className="text-xs text-center">{d.rank}</td>
-  //                 <td>
-  //                   <div className="flex flex-col gap-1">
-  //                     <div className="flex gap-1">
-  //                       <div className="text-xs font-bold">{d.avatar.name}</div>
-  //                       <div
-  //                         className="text-xs opacity-30 hover:bg-base-200 hover:cursor-pointer"
-  //                         onClick={() => {
-  //                           navigator.clipboard.writeText(d.avatar.code);
-  //                           alert(`Copy ${d.avatar.code}`);
-  //                         }}
-  //                       >
-  //                         #{d.avatar.code.slice(0, 4)}
-  //                       </div>
-  //                     </div>
-  //                     <div className="text-xs">CP {d.cp}</div>
-  //                   </div>
-  //                 </td>
-  //                 <td className="text-xs">{d.score}</td>
-  //                 <td className="text-center">
-  //                   {d.winRate === undefined || d.winRate === null ? (
-  //                     <button
-  //                       className="btn btn-xs"
-  //                       onClick={() => handleWinRateClick(i)}
-  //                     >
-  //                       {d.winRate === undefined ? (
-  //                         "?"
-  //                       ) : (
-  //                         <span className="loading loading-xs loading-spinner"></span>
-  //                       )}
-  //                     </button>
-  //                   ) : (
-  //                     <div
-  //                       className={`badge ${
-  //                         d.winRate < 30 ? "badge-primary" : "badge-secondary"
-  //                       }`}
-  //                     >
-  //                       {d.winRate}%
-  //                     </div>
-  //                   )}
-  //                 </td>
-  //               </tr>
-  //             ))}
-  //           </tbody>
-  //         </table>
-  //       )}
-  //     </div>
-
-  //     <div className="join w-full flex justify-center mt-4 mb-2">
-  //       <button
-  //         className={`join-item btn btn-xs ${
-  //           currentPage === 1 ? "btn-disabled" : ""
-  //         }`}
-  //         onClick={() => handlePageChange(currentPage - 1)}
-  //       >
-  //         «
-  //       </button>
-  //       {visiblePageNumbers().map((page) => (
-  //         <button
-  //           key={page}
-  //           className={`join-item btn btn-xs ${
-  //             currentPage === page ? "btn-active" : ""
-  //           }`}
-  //           onClick={() => handlePageChange(page)}
-  //         >
-  //           {page}
-  //         </button>
-  //       ))}
-  //       <button
-  //         className={`join-item btn btn-xs ${
-  //           !hasMoreData ? "btn-disabled" : ""
-  //         }`}
-  //         onClick={() => handlePageChange(currentPage + 1)}
-  //       >
-  //         »
-  //       </button>
-  //     </div>
-  //   </div>
-  // );
 };
 
 export default ArenaPage;
