@@ -42,6 +42,9 @@ export async function getWinRate(
   myAvatarAddress: string,
   enemyAvatarAddress: string
 ): Promise<any> {
+  if (!myAvatarAddress.startsWith("0x")) myAvatarAddress = "0x" + myAvatarAddress;
+  if (!enemyAvatarAddress.startsWith("0x")) enemyAvatarAddress = "0x" + enemyAvatarAddress;
+
   const body = {
     myAvatarAddress,
     enemyAvatarAddress,
