@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { RadioGroup } from "@headlessui/react";
+import { useQuery } from "@tanstack/react-query";
 import { Routes } from "../../constants";
 import { Avatar } from "../../types";
 import { getAvatars } from "../../apiClient";
@@ -8,24 +9,23 @@ import NcLogo from "../../assets/images/nc-logo.png";
 
 const AvatarInputPage = () => {
   const navigate = useNavigate();
-
-  const [avatars, setAvatars] = useState<Avatar[]>([]);
-  const [avatarIndex, setAvatarIndex] = useState<number>(0);
   const [searchParams] = useSearchParams();
+  const [avatarIndex, setAvatarIndex] = useState<number>(0);
   const agentAddress = searchParams.get("agentAddress");
 
-  useEffect(() => {
-    if (agentAddress) {
-      getAvatars(agentAddress).then((r) => {
-        setAvatars(
-          r.avatars.map((d: any) => ({
-            name: d.avatarName,
-            code: d.avatarAddress,
-          }))
-        );
-      });
-    }
-  }, []);
+  const avatarQuery = useQuery({
+    queryKey: ["avatars", agentAddress],
+    queryFn: () => (agentAddress ? getAvatars(agentAddress) : { avatars: [] }),
+  });
+
+  const avatars = useMemo<Avatar[]>(() => {
+    return (
+      avatarQuery.data?.avatars?.map((avatar: any) => ({
+        name: avatar.avatarName,
+        code: avatar.avatarAddress,
+      })) || []
+    );
+  }, [avatarQuery.data]);
 
   const handleSubmit = () => {
     navigate(`/${Routes.ARENA}?avatarAddress=${avatars[avatarIndex].code}`);
@@ -58,12 +58,12 @@ const AvatarInputPage = () => {
             className="flex flex-col gap-6"
           >
             {avatars.map((avatar, index) => (
-              <RadioGroup.Option value={index}>
+              <RadioGroup.Option key={index} value={index}>
                 {({ checked }) => (
                   <button
                     className={`p-3 w-full rounded-full text-xl text-center ${checked ? "bg-neutral-50 text-neutral-950 font-bold" : "bg-neutral-950 text-neutral-50"}`}
                   >
-                    {avatar.name}
+                    {avatar.name}#{avatar.code.slice(2, 6)}
                   </button>
                 )}
               </RadioGroup.Option>

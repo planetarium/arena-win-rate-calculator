@@ -1,4 +1,5 @@
 import { BASE_URL } from "./constants";
+import { ArenaRanking } from "./types";
 
 const defaultHeaders: HeadersInit = {
   "Content-Type": "application/json",
@@ -64,12 +65,22 @@ export async function getAvatars(agentAddress: string): Promise<any> {
 export async function getArenaRanking(
   limit: number,
   offset: number,
-): Promise<any> {
-  return fetchAPI<any>(`arena/ranking?limit=${limit}&offset=${offset}`);
+): Promise<ArenaRanking[]> {
+  const rankings = await fetchAPI<any[]>(`arena/ranking?limit=${limit}&offset=${offset}`);
+
+  return rankings.map((ranking: any) => ({
+    address: '0x' + ranking.avatarAddress.toLowerCase(),
+    code: ranking.avatarAddress.toUpperCase().slice(0, 4),
+    name: ranking.avatar.avatarName,
+    ranking: ranking.rank,
+    score: ranking.score,
+    cp: ranking.cp,
+  }));
 }
 
 export async function getArenaIndex(
   avatarAddress: string,
-): Promise<any> {
+): Promise<number> {
+  if (avatarAddress.startsWith("0x")) avatarAddress = avatarAddress.slice(2)
   return fetchAPI<number>(`arena/ranking/${avatarAddress}/rank`);
 }
