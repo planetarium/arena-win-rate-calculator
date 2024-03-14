@@ -102,6 +102,7 @@ const ArenaPage = () => {
           <ArenaRankingList
             selected={myAvatarAddress ?? undefined}
             arenaRankings={arenaRankingsQuery.data ?? []}
+            myAvatarAddress={myAvatarAddress ?? undefined}
           />
         )}
       </div>
