@@ -1,4 +1,5 @@
 import { BASE_URL } from "./constants";
+import { ArenaRanking } from "./types";
 
 const defaultHeaders: HeadersInit = {
   "Content-Type": "application/json",
@@ -42,6 +43,9 @@ export async function getWinRate(
   myAvatarAddress: string,
   enemyAvatarAddress: string
 ): Promise<any> {
+  if (!myAvatarAddress.startsWith("0x")) myAvatarAddress = "0x" + myAvatarAddress;
+  if (!enemyAvatarAddress.startsWith("0x")) enemyAvatarAddress = "0x" + enemyAvatarAddress;
+
   const body = {
     myAvatarAddress,
     enemyAvatarAddress,
@@ -58,44 +62,25 @@ export async function getAvatars(agentAddress: string): Promise<any> {
   return fetchAPI<any>(`agent/${agentAddress}/avatars`);
 }
 
-export async function getArenaIndex(
+export async function getArenaRanking(
   limit: number,
   offset: number,
-  avatarAddress: string | undefined = undefined
-): Promise<any> {
-  const graphqlQuery = {
-    operationName: "GetArenaRanking",
-    query: `query GetArenaRanking($offset: Int! $limit: Int!, $avatarAddress: String) {
-        battleArenaRanking(
-          championshipId: 0
-          round: 9
-          offset: $offset
-          limit: $limit
-          avatarAddress: $avatarAddress
-        ) {
-          blockIndex
-          agentAddress
-          avatarAddress
-          name
-          cp
-          round
-          score
-          ticket
-          ranking
-          timeStamp
-        }
-      }`,
-    variables: {
-      offset,
-      limit,
-      avatarAddress,
-    },
-  };
+): Promise<ArenaRanking[]> {
+  const rankings = await fetchAPI<any[]>(`arena/ranking?limit=${limit}&offset=${offset}`);
 
-  return fetchAPI<any>("dp", {
-    method: "POST",
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    body: graphqlQuery,
-  });
+  return rankings.map((ranking: any) => ({
+    address: '0x' + ranking.avatarAddress.toLowerCase(),
+    code: ranking.avatarAddress.toUpperCase().slice(0, 4),
+    name: ranking.avatar.avatarName,
+    ranking: ranking.rank,
+    score: ranking.score,
+    cp: ranking.cp,
+  }));
+}
+
+export async function getArenaIndex(
+  avatarAddress: string,
+): Promise<number> {
+  if (avatarAddress.startsWith("0x")) avatarAddress = avatarAddress.slice(2)
+  return fetchAPI<number>(`arena/ranking/${avatarAddress}/rank`);
 }
