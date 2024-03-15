@@ -1,303 +1,112 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Avatar } from "../../types";
-import { getArenaIndex, getArenaRanking, getWinRate } from "../../apiClient";
-
-interface ArenaInfo {
-  rank: number;
-  avatar: Avatar;
-  score: number;
-  cp: number;
-  winRate: number | null | undefined;
-}
+import { getArenaRanking } from "../../apiClient";
+import { useQuery } from "@tanstack/react-query";
+import NcLogo from "../../assets/images/nc-logo.png";
+import { FiSearch } from "react-icons/fi";
+import { Spinner } from "../../components/Spinner";
+import { ArenaRankingList } from "./RankingList";
+import { useArenaPage } from "./useArenaPage";
 
 const ArenaPage = () => {
   const [searchParams] = useSearchParams();
   const myAvatarAddress = searchParams.get("avatarAddress");
+  const myArenaPageQuery = useArenaPage(myAvatarAddress ?? undefined);
 
-  const [searchAddress, setSearchAddress] = useState<string>("");
-  const [avatarAddress, setAvatarAddress] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [searchAddress, setSearchAddress] = useState(myAvatarAddress ?? "");
 
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const arenaRankingsQuery = useQuery({
+    queryKey: ["arenaRankings", currentPage],
+    queryFn: () => getArenaRanking(15, (currentPage - 1) * 15),
+  });
 
-  const [arenaInfos, setArenaInfos] = useState<Array<ArenaInfo>>([]);
-  const [currentPage, setCurrentPage] = useState<number>(-1);
-  const [hasMoreData, setHasMoreData] = useState<boolean>(true);
-  const limit = 15;
+  const isLoading = useMemo(
+    () => myArenaPageQuery.isLoading || arenaRankingsQuery.isLoading,
+    [myArenaPageQuery.isLoading, arenaRankingsQuery.isLoading]
+  );
+  const pages = useMemo(() => {
+    return new Array(5).fill(0).map((_, i) => currentPage + i - 2);
+  }, [currentPage]);
+
+  useEffect(() => {
+    myArenaPageQuery.data && setCurrentPage(myArenaPageQuery.data);
+  }, [myArenaPageQuery.data]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchAddress(e.target.value);
   };
+  const handleInputSubmit = () => {};
+  const handlePageChange = (page: number) => setCurrentPage(page);
 
-  const handleInputSubmit = () => {
-    if (searchAddress.length < 42 || !searchAddress.startsWith("0x")) {
-      alert(
-        "Please enter a valid agent address. It should start with '0x' and be at least 42 characters long."
-      );
-      return;
-    }
-
-    setAvatarAddress(searchAddress);
-  };
-
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && (hasMoreData || page < currentPage)) {
-      setCurrentPage(page);
-    }
-  };
-
-  const handleWinRateClick = (index: number) => {
-    setArenaInfos((prevAreaInfos) =>
-      prevAreaInfos.map((v, i) => {
-        if (i === index) {
-          return {
-            ...v,
-            winRate: null,
-          };
-        }
-        return v;
-      })
-    );
-
-    if (myAvatarAddress) {
-      getWinRate(myAvatarAddress, arenaInfos[index].avatar.code).then((r) => {
-        setArenaInfos((prevAreaInfos) =>
-          prevAreaInfos.map((v, i) => {
-            if (i === index) {
-              return {
-                ...v,
-                winRate: Math.round(r.winRate * 100),
-              };
-            }
-            return v;
-          })
-        );
-      });
-    }
-  };
-
-  const visiblePageNumbers = () => {
-    const pages = [];
-    const startPage = Math.max(1, currentPage - 2);
-    let endPage = startPage + 4;
-
-    if (startPage === 1) {
-      endPage = 5;
-    }
-
-    if (endPage < currentPage && !hasMoreData) {
-      endPage = currentPage;
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-
-    return pages;
-  };
-
-  const fetchArenaInfos = (page: number) => {
-    setIsLoading(true);
-
-    const offset = (page - 1) * limit;
-    getArenaRanking(limit, offset).then((r) => {
-      console.log(r);
-      setArenaInfos(
-        r.map((d: any) => ({
-          rank: d.rank,
-          avatar: {
-            name: d.avatar.avatarName,
-            code: d.avatar.avatarAddress,
-          },
-          score: d.score,
-          cp: d.cp,
-          winRate: undefined,
-        }))
-      );
-      setHasMoreData(r.length === limit);
-      setIsLoading(false);
-    });
-  };
-
-  const findPageWithAvatar = async (targetAvatarAddress: string) => {
-    setIsLoading(true);
-
-    const maxAttempts = 10;
-    let pageFound = false;
-    let attempts = 0;
-
-    const targetAvatarIndex = await getArenaIndex(targetAvatarAddress);
-    if (!targetAvatarIndex) {
-      setIsLoading(false);
-      setCurrentPage(1);
-      return;
-    }
-
-    let page = Math.ceil(targetAvatarIndex / limit);
-
-    while (!pageFound && attempts < maxAttempts) {
-      const offset = (page - 1) * limit;
-      const data = await getArenaRanking(limit, offset);
-      console.log(data);
-
-      const avatarEntry = data.find(
-        (d: any) => d.avatarAddress === targetAvatarAddress
-      );
-
-      if (avatarEntry) {
-        pageFound = true;
-        setCurrentPage(page);
-      } else {
-        const minRankingInResponse = Math.min(...data.map((d: any) => d.rank));
-        const maxRankingInResponse = Math.max(...data.map((d: any) => d.rank));
-
-        if (minRankingInResponse == maxRankingInResponse) {
-          page += 1;
-        } else if (targetAvatarIndex <= minRankingInResponse) {
-          page -= 1;
-        } else if (targetAvatarIndex >= maxRankingInResponse) {
-          page += 1;
-        }
-
-        attempts += 1;
-      }
-    }
-
-    if (!pageFound) {
-      setCurrentPage(page);
-    }
-
-    setIsLoading(false);
-  };
-
-  useEffect(() => {
-    if (avatarAddress) {
-      findPageWithAvatar(avatarAddress);
-    }
-  }, [avatarAddress]);
-
-  useEffect(() => {
-    if (myAvatarAddress) setAvatarAddress(myAvatarAddress);
-  }, []);
-
-  useEffect(() => {
-    if (currentPage != -1) fetchArenaInfos(currentPage);
-  }, [currentPage]);
-
-  return (
-    <div className="px-4 flex flex-col flex-1 bg-neutral card shadow-xl">
-      <div className="join w-full mt-4">
-        <input
-          className="input join-item w-full"
-          placeholder="0x..."
-          value={searchAddress}
-          onChange={handleInputChange}
-        />
-        <button className="btn join-item" onClick={handleInputSubmit}>
-          Search
-        </button>
+  const Controller = () => (
+    <div>
+      <div className="mb-10">
+        <div className="flex gap-4 w-full py-3 pl-6 pr-4 rounded-full bg-neutral-50 text-neutral-500">
+          <input
+            className="flex-1 bg-transparent"
+            placeholder="0x..."
+            value={searchAddress}
+            onChange={handleInputChange}
+          />
+          <button className="px-2" onClick={handleInputSubmit}>
+            <FiSearch size={20} />
+          </button>
+        </div>
       </div>
-
-      <div className="mt-2 overflow-auto min-h-0 flex-grow flex-shrink basis-0">
-        {isLoading ? (
-          <div className="flex justify-center items-center">
-            <span className="loading loading-dots loading-lg"></span>{" "}
-          </div>
-        ) : (
-          <table className="table table-sm">
-            <thead>
-              <tr>
-                <th>Rank</th>
-                <th>Info</th>
-                <th>Score</th>
-                <th className="text-center">Win Rate</th>
-              </tr>
-            </thead>
-            <tbody>
-              {arenaInfos.map((d, i) => (
-                <tr
-                  key={d.avatar.code}
-                  className={`${
-                    d.avatar.code === avatarAddress ? "bg-base-100" : ""
-                  }`}
-                >
-                  <td className="text-xs text-center">{d.rank}</td>
-                  <td>
-                    <div className="flex flex-col gap-1">
-                      <div className="flex gap-1">
-                        <div className="text-xs font-bold">{d.avatar.name}</div>
-                        <div
-                          className="text-xs opacity-30 hover:bg-base-200 hover:cursor-pointer"
-                          onClick={() => {
-                            navigator.clipboard.writeText(d.avatar.code);
-                            alert(`Copy ${d.avatar.code}`);
-                          }}
-                        >
-                          #{d.avatar.code.slice(0, 4)}
-                        </div>
-                      </div>
-                      <div className="text-xs">CP {d.cp}</div>
-                    </div>
-                  </td>
-                  <td className="text-xs">{d.score}</td>
-                  <td className="text-center">
-                    {d.winRate === undefined || d.winRate === null ? (
-                      <button
-                        className="btn btn-xs"
-                        onClick={() => handleWinRateClick(i)}
-                      >
-                        {d.winRate === undefined ? (
-                          "?"
-                        ) : (
-                          <span className="loading loading-xs loading-spinner"></span>
-                        )}
-                      </button>
-                    ) : (
-                      <div
-                        className={`badge ${
-                          d.winRate < 30 ? "badge-primary" : "badge-secondary"
-                        }`}
-                      >
-                        {d.winRate}%
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-
-      <div className="join w-full flex justify-center mt-4 mb-2">
+      <div className="flex justify-center gap-4 select-none">
         <button
-          className={`join-item btn btn-xs ${
-            currentPage === 1 ? "btn-disabled" : ""
-          }`}
+          className={`flex items-center justify-center w-8 h-8 rounded-full ${currentPage === 1 ? "text-neutral-500" : "bg-neutral-50 text-neutral-950"}`}
           onClick={() => handlePageChange(currentPage - 1)}
         >
           «
         </button>
-        {visiblePageNumbers().map((page) => (
+        {pages.map((page) => (
           <button
             key={page}
-            className={`join-item btn btn-xs ${
-              currentPage === page ? "btn-active" : ""
-            }`}
+            className={`flex items-center justify-center w-8 h-8 rounded-full ${currentPage === page ? "bg-neutral-50 text-neutral-950" : ""}`}
             onClick={() => handlePageChange(page)}
           >
             {page}
           </button>
         ))}
         <button
-          className={`join-item btn btn-xs ${
-            !hasMoreData ? "btn-disabled" : ""
-          }`}
+          className={`flex mb-4 items-center justify-center w-8 h-8 rounded-full ${false ? "text-neutral-500" : "bg-neutral-50 text-neutral-950"}`}
           onClick={() => handlePageChange(currentPage + 1)}
         >
           »
         </button>
       </div>
+    </div>
+  );
+
+  return (
+    <div className="flex flex-col flex-1">
+      <header className="flex-shrink-0 h-80 bg-[url('/src/assets/images/nc-bg.png')] bg-cover relative">
+        <div className="bg-neutral-950 bg-opacity-60 absolute w-full h-full flex flex-col justify-between p-8">
+          <a href="/">
+            <img src={NcLogo} alt="NcLogo" className="h-6" />
+          </a>
+          <div>
+            <p className="text-xl">Comparing with</p>
+            <h1 className="text-5xl font-black">
+              #{myAvatarAddress?.slice(2, 6)}
+            </h1>
+          </div>
+        </div>
+      </header>
+      <div className="flex-1 flex flex-col gap-8 py-4 mb-8">
+        {isLoading ? (
+          <Spinner className="py-4 self-center" />
+        ) : (
+          <ArenaRankingList
+            selected={myAvatarAddress ?? undefined}
+            arenaRankings={arenaRankingsQuery.data ?? []}
+            myAvatarAddress={myAvatarAddress ?? undefined}
+          />
+        )}
+      </div>
+      <Controller />
     </div>
   );
 };
