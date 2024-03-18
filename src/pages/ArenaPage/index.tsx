@@ -30,7 +30,13 @@ const ArenaPage = () => {
     [myArenaPageQuery.isLoading, arenaRankingsQuery.isLoading]
   );
   const pages = useMemo(() => {
-    return new Array(5).fill(0).map((_, i) => currentPage + i - 2);
+    return new Array(5).fill(0).reduce((acc, _, i) => {
+      const value = currentPage + i - 2;
+      if (value > 0) {
+        acc.push(value);
+      }
+      return acc;
+    }, []);
   }, [currentPage]);
 
   useEffect(() => {
@@ -41,7 +47,12 @@ const ArenaPage = () => {
     setSearchAddress(e.target.value);
   };
   const handleInputSubmit = () => {};
-  const handlePageChange = (page: number) => setCurrentPage(page);
+  const handlePageChange = (page: number) => {
+    if (page > 0) {
+      setCurrentPage(page);
+    }
+  };
+
   const handleBackButton = () => {
     navigate(`/${Routes.AVATAR}?agentAddress=${myAgentAddress}`);
   };
