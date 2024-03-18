@@ -47,6 +47,7 @@ export async function getWinRate(
   if (!enemyAvatarAddress.startsWith("0x")) enemyAvatarAddress = "0x" + enemyAvatarAddress;
 
   const body = {
+    seed: 0,
     myAvatarAddress,
     enemyAvatarAddress,
   };

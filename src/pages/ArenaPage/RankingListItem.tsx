@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { FC, useState } from "react";
-import { FiDownload } from "react-icons/fi";
+import { FiCpu } from "react-icons/fi";
 import { ArenaRanking } from "../../types";
 import { Spinner } from "../../components/Spinner";
 import { getWinRate } from "../../apiClient";
@@ -16,7 +16,7 @@ export const ArenaRankingListItem: FC<{
     queryFn: async (key) => {
       const [, address, myAvatarAddress] = key.queryKey;
       if (!address || !myAvatarAddress) return null;
-      const { winRate } = await getWinRate(address, myAvatarAddress);
+      const { winRate } = await getWinRate(myAvatarAddress, address);
       return Math.floor(winRate * 100);
     },
     refetchOnWindowFocus: false,
@@ -45,7 +45,7 @@ export const ArenaRankingListItem: FC<{
             className="inline-flex h-8 w-8 rounded-full bg-neutral-50 justify-center items-center"
             onClick={() => setFetched(true)}
           >
-            <FiDownload className="stroke-neutral-950" size={20} />
+            <FiCpu className="stroke-neutral-950" size={20} />
           </button>
         ) : winRateQuery.isLoading ? (
           <div className="flex justify-center">
