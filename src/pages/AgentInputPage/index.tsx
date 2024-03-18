@@ -40,7 +40,7 @@ const AgentInputPage = () => {
       <div className="flex-1 flex flex-col justify-between p-8">
         <div className="flex flex-col gap-12">
           <div className="flex flex-col gap-2">
-            <label>Avatar Address</label>
+            <label>Agent Address</label>
             <input
               type="text"
               placeholder="0x000000..."
