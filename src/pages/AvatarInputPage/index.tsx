@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { RadioGroup } from "@headlessui/react";
 import { useQuery } from "@tanstack/react-query";
+import { FiArrowLeft } from "react-icons/fi";
 import { Routes } from "../../constants";
 import { Avatar } from "../../types";
 import { getAvatars } from "../../apiClient";
@@ -28,20 +29,35 @@ const AvatarInputPage = () => {
   }, [avatarQuery.data]);
 
   const handleSubmit = () => {
-    navigate(`/${Routes.ARENA}?avatarAddress=${avatars[avatarIndex].code}`);
+    localStorage.setItem("avatar", avatars[avatarIndex].code);
+    navigate(
+      `/${Routes.ARENA}?agentAddress=${agentAddress}&avatarAddress=${avatars[avatarIndex].code}`
+    );
   };
 
   const handleRadioChange = (i: number) => {
     setAvatarIndex(i);
   };
 
+  const handleBackButton = () => {
+    navigate(`/${Routes.ROOT}?useCache=false`);
+  };
+
   return (
     <div className="flex flex-col flex-1">
       <header className="flex-1 max-h-80 bg-[url('/src/assets/images/nc-bg.png')] bg-cover relative">
         <div className="bg-neutral-950 bg-opacity-60 absolute w-full h-full flex flex-col justify-between p-8">
-          <a href="/">
-            <img src={NcLogo} alt="NcLogo" className="h-6" />
-          </a>
+          <div className="flex justify-between">
+            <a href="/">
+              <img src={NcLogo} alt="NcLogo" className="h-6" />
+            </a>
+            <button
+              onClick={handleBackButton}
+              className="inline-flex h-8 w-8 rounded-full bg-neutral-50 justify-center items-center"
+            >
+              <FiArrowLeft className="stroke-neutral-950" size={20} />
+            </button>
+          </div>
           <div>
             <h1 className="text-5xl font-black">Ares</h1>
             <p className="text-xl text-neutral-500">
@@ -61,7 +77,11 @@ const AvatarInputPage = () => {
               <RadioGroup.Option key={index} value={index}>
                 {({ checked }) => (
                   <button
-                    className={`p-3 w-full rounded-full text-xl text-center ${checked ? "bg-neutral-50 text-neutral-950 font-bold" : "bg-neutral-950 text-neutral-50"}`}
+                    className={`p-3 w-full rounded-full text-xl text-center ${
+                      checked
+                        ? "bg-neutral-50 text-neutral-950 font-bold"
+                        : "bg-neutral-950 text-neutral-50"
+                    }`}
                   >
                     {avatar.name}#{avatar.code.slice(2, 6)}
                   </button>

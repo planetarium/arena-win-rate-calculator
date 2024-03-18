@@ -1,11 +1,28 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { Routes } from "../../constants";
 import NcLogo from "../../assets/images/nc-logo.png";
 
 const AgentInputPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [agentAddress, setAgentAddress] = useState("");
+  const useCache = searchParams.get("useCache");
+
+  useEffect(() => {
+    if (useCache !== "false") {
+      const cachedAgentAddress = localStorage.getItem("agent");
+      const cachedAvatarAddress = localStorage.getItem("avatar");
+
+      if (cachedAvatarAddress !== null && cachedAgentAddress !== null) {
+        navigate(
+          `/${Routes.ARENA}?agentAddress=${cachedAgentAddress}&avatarAddress=${cachedAvatarAddress}`
+        );
+      } else if (cachedAgentAddress !== null) {
+        navigate(`/${Routes.AVATAR}?agentAddress=${cachedAgentAddress}`);
+      }
+    }
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAgentAddress(e.target.value);
@@ -19,6 +36,8 @@ const AgentInputPage = () => {
       return;
     }
 
+    localStorage.setItem("network", "heimdall");
+    localStorage.setItem("agent", agentAddress);
     navigate(`/${Routes.AVATAR}?agentAddress=${agentAddress}`);
   };
 
@@ -52,10 +71,10 @@ const AgentInputPage = () => {
           <div className="flex flex-col gap-2">
             <label>Planet</label>
             <div className="flex gap-3">
-              <button className="flex-1 font-bold p-3 bg-neutral-50 rounded-full text-neutral-950 text-xl">
+              <button className="flex-1 p-3 bg-neutral-950 rounded-full text-neutral-50 text-xl">
                 Odin
               </button>
-              <button className="flex-1 p-3 bg-neutral-950 rounded-full text-neutral-50 text-xl">
+              <button className="flex-1 font-bold p-3 bg-neutral-50 rounded-full text-neutral-950 text-xl">
                 Heimdall
               </button>
             </div>
