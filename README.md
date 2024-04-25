@@ -1,30 +1,13 @@
-# React + TypeScript + Vite
+Hello everyone! I'm excited to introduce Ares, a new third-party website specifically designed for Nine Chronicles players.
+Site Link: https://ares.nine-chronicles.dev/
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# Overview
+Ares is a powerful tool that computes win rates for arena battles and provides detailed insights into arena rankings.
+For those who have used the "Ares: mod for NineChronicles Unity Client", you'll be delighted to know that this website extends the same functionalities in a more accessible format.
 
-Currently, two official plugins are available:
+# Key Features
+Unlike the standalone mod, Ares is accessible directly through your web browser.
+Simply enter your agent address and choose your avatar to get started. It's that easy!
+Ares has been optimized for mobile use, ensuring a seamless experience on your devices. Please note that the site currently supports only the Heimdall framework.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
-
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+Check out the site and enhance your Nine Chronicles experience today

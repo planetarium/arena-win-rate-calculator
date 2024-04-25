@@ -29,7 +29,7 @@ const ArenaPage = () => {
     () => myArenaPageQuery.isLoading || arenaRankingsQuery.isLoading,
     [myArenaPageQuery.isLoading, arenaRankingsQuery.isLoading]
   );
-  const pages = useMemo(() => {
+  const pages: number[] = useMemo(() => {
     return new Array(5).fill(0).reduce((acc, _, i) => {
       const value = currentPage + i - 2;
       if (value > 0) {
